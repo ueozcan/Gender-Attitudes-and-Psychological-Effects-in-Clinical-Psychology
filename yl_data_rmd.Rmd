@@ -1,0 +1,246 @@
+---
+title: "Statistics in Clinical Psychology"
+author: "Uğur Enes ÖZCAN"
+date: "2025-03-31"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+options(repos = c(CRAN = "https://cloud.r-project.org/"))
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r , echo=TRUE}
+
+library(readxl)
+library(moments)
+library(writexl)
+library(apaTables)
+library(rempsyc)
+library(officer)
+library(flextable)
+
+DATA <- read_excel("C:/YL-Data/DATARAW.xlsx")
+
+## TASK 1
+
+# We are creating the inverse dimensions.
+
+DATA$BF1R <- 7 - DATA$BF1
+DATA$BF3R <- 7 - DATA$BF3
+DATA$BF4R <- 7 - DATA$BF4
+DATA$BF7R <- 7 - DATA$BF7
+DATA$BF14R <- 7 - DATA$BF14
+DATA$BF2R <- 7 - DATA$BF2
+DATA$BF5R <- 7 - DATA$BF5
+DATA$BF9R <- 7 - DATA$BF9
+DATA$BF20R <- 7 - DATA$BF20
+
+
+### FOR CR:
+
+# Protective Sexism subscale score.
+DATA$CR_Protective_Sexism <- rowMeans(DATA[, c("CR1", "CR3", "CR6", "CR9", "CR12", "CR13", "CR17", "CR20")],
+                                           na.rm = TRUE)
+# CONTROL
+summary(DATA$CR_Protective_Sexism)
+
+# Heterosexual Closeness subscale score.
+DATA$CR_Heterosexual_Closeness <- rowMeans(DATA[, c("CR1", "CR6", "CR12", "CR13")],
+                                           na.rm = TRUE)
+# CONTROL
+summary(DATA$CR_Heterosexual_Closeness)
+
+# Protective Patriarchy subscale score.
+DATA$CR_Protective_Patriarchy <- rowMeans(DATA[, c("CR3", "CR9", "CR17", "CR20")],
+                                         na.rm = TRUE)
+# CONTROL
+summary(DATA$CR_Protective_Patriarchy)
+
+# Intergender Complementary Differentiation subscale score.
+DATA$CR_Intergender_Complementary_Differentiation <- rowMeans(DATA[, c("CR8", "CR19", "CR22")],
+                                                              na.rm = TRUE)
+# CONTROL
+summary(DATA$CR_Intergender_Complementary_Differentiation)
+
+
+### FOR BF:
+
+# The 'Self' Position (No Reverse Scoring) Subscale Score
+DATA$BF_The_Self_Position <- rowMeans(DATA[, c("CR6", "CR10", "CR12", "CR13", "CR16")],
+                                 na.rm = TRUE)
+# CONTROL
+summary(DATA$BF_The_Self_Position)
+
+# Emotional Detachment (Reverse Scored) Subscale Score
+DATA$BF_Emotional_Detachment <- rowMeans(DATA[, c("BF1R", "BF3R", "BF4R", "BF7R", "BF14R")],
+                                   na.rm = TRUE)
+# CONTROL
+summary(DATA$BF_Emotional_Detachment)
+
+# Dependency on Others (Reverse Scored) Subscale Score
+DATA$BF_Dependency_on_Others <- rowMeans(DATA[, c("BF2R", "BF5R", "BF9R", "BF14R", "BF20R")],
+                                           na.rm = TRUE)
+# CONTROL
+summary(DATA$BF_Dependency_on_Others)
+
+
+## TASK 2
+
+# "The 'I' Position Subscale Normality Test"
+BF_The_Self_Position_shapiro_test <- shapiro.test(DATA$BF_The_Self_Position)
+BF_The_Self_Position_shapiro_test
+
+formatC(BF_The_Self_Position_shapiro_test$p.value,
+        format = "f",
+        digits = 3)
+## INTERPRETATION: It does not show a normal distribution, as p = 0.000 < alpha = 0.05.
+
+# Emotional Detachment Subscale Normality Test.
+BF_Emotional_Detachment_shapiro_test <- shapiro.test(DATA$BF_Emotional_Detachment)
+BF_Emotional_Detachment_shapiro_test
+
+formatC(BF_Emotional_Detachment_shapiro_test$p.value,
+        format = "f",
+        digits = 3)
+## INTERPRETATION: It does not show a normal distribution, as p = 0.003 < alpha = 0.05.
+
+# Normality test for the "Dependency on Others" subscale
+BF_Dependency_on_Others_shapiro_test <- shapiro.test(DATA$BF_Dependency_on_Others)
+BF_Dependency_on_Others_shapiro_test
+
+formatC(BF_Dependency_on_Others_shapiro_test$p.value,
+        format = "f",
+        digits = 3)
+## INTERPRETATION: It does not show a normal distribution, as p = 0.009 < alfa = 0.05
+
+# Normality test for the "Protective Sexism" subscale
+Protective_Sexism_shapiro_test <- shapiro.test(DATA$CR_Protective_Sexism)
+Protective_Sexism_shapiro_test
+
+formatC(Protective_Sexism_shapiro_test$p.value,
+        format = "f",
+        digits = 3)
+## INTERPRETATION: It does not show a normal distribution, as p = 0.000 < alfa = 0.05
+
+
+## TASK 3
+
+names(DATA)
+
+# "Importing Required Packages"
+
+library(moments)
+library(writexl)
+library(apaTables)
+library(rempsyc)
+library(officer)
+library(flextable)
+
+## FOR Heterosexual Intimacy:
+
+table(DATA$CR_Heterosexual_Closeness)
+class(DATA$CR_Heterosexual_Closeness)
+
+DATA$GenderF <- factor(DATA$Gender,
+                         levels = c(1,2),
+                         labels = c("Woman","Man"))
+
+table(DATA$GenderF)
+class(DATA$GenderF)
+
+apa.1way.table(iv = GenderF,
+               dv = CR_Heterosexual_Closeness,
+               data = DATA,
+               filename = "Table_CR_Heterosexual_Closeness.doc",
+               table.number = 4)
+
+CR_Heterosexual_Closeness_ttest <- nice_t_test(data = DATA,
+                                               response = c("CR_Heterosexual_Closeness"),
+                                               group = "Gender",
+                                               warning = FALSE,
+                                               var.equal = TRUE)
+CR_Heterosexual_Closeness_ttest
+
+save_as_docx(nice_table(CR_Heterosexual_Closeness_ttest),
+             path = "Table_CR_Heterosexual_Closeness_t_test.docx")
+
+# INTERPRETATION:
+# The scores for Heterosexual Intimacy did not show a significant difference between gender groups, t(237) = -1.17, p = 0.24, d = -0.22. Although the scores for men (M = 3.49, SD = 1.14) were slightly higher than those for women (M = 3.17, SD = 1.48), this difference was not statistically significant. The effect size (Cohen’s d) is small, indicating that the practical impact of the gender difference is minimal.
+
+
+## FOR PROTECTIVE PATRIARCHY:
+
+table(DATA$CR_Protective_Patriarchy)
+class(DATA$CR_Protective_Patriarchy)
+
+apa.1way.table(iv = GenderF,
+               dv = CR_Protective_Patriarchy,
+               data = DATA,
+               filename = "Table_CR_Protective_Patriarchy.doc",
+               table.number = 4)
+
+CR_Protective_Patriarchy_ttest <- nice_t_test(data = DATA,
+                                            response = c("CR_Protective_Patriarchy"),
+                                            group = "Gender",
+                                            warning = FALSE,
+                                            var.equal = TRUE)
+CR_Protective_Patriarchy_ttest
+
+save_as_docx(nice_table(CR_Protective_Patriarchy_ttest),
+             path = "Table_CR_Protective_Patriarchy_t_test.docx")
+
+# INTERPRETATION:
+# The scores for Protective Patriarchy did not show a significant difference between gender groups, t(42.68) = -1.57, p = 0.12, d = -0.27. Although the scores for men (M = 3.70, SD = 1.18) were slightly higher than those for women (M = 3.34, SD = 1.35), this difference was not statistically significant. The effect size (Cohen’s d) is small, indicating that the practical impact of the gender difference is minimal.
+
+
+## FOR INTERGENDER COMPLEMENTARY DIFFERENTIATION: 
+
+table(DATA$CR_Intergender_Complementary_Differentiation)
+class(DATA$CR_Intergender_Complementary_Differentiation)
+
+apa.1way.table(iv = GenderF,
+               dv = CR_Intergender_Complementary_Differentiation,
+               data = DATA,
+               filename = "Table_CR_Intergender_Complementary_Differentiation.doc",
+               table.number = 4)
+
+CR_Intergender_Complementary_Differentiation_ttest <- nice_t_test(data = DATA,
+                                               response = c("CR_Intergender_Complementary_Differentiation"),
+                                               group = "Gender",
+                                               warning = FALSE,
+                                               var.equal = TRUE)
+CR_Intergender_Complementary_Differentiation_ttest
+
+save_as_docx(nice_table(CR_Intergender_Complementary_Differentiation_ttest),
+             path = "Table_CR_Intergender_Complementary_Differentiation_t_test.docx")
+
+# INTERPRETATION:
+# Intergender Complementary Differentiation scores did not show a significant difference between gender groups, t(237) = 0.92, p = 0.35, d = 0.17. Although males (M = 3.57, SD = 1.19) had slightly higher scores than females (M = 3.81, SD = 1.39), this difference was not statistically significant. The effect size (Cohen’s d) was small, indicating that the practical impact of the gender difference is minimal.
+
+
+## FOR THE "SELF" POSITION:
+
+table(DATA$BF_The_Self_Position)
+class(DATA$BF_The_Self_Position)
+
+apa.1way.table(iv = GenderF,
+               dv = BF_The_Self_Position,
+               data = DATA,
+               filename = "Table_BF_The_Self_Position.doc",
+               table.number = 4)
+
+BF_The_Self_Position_ttest <- nice_t_test(data = DATA,
+                                     response = c("BF_The_Self_Position"),
+                                     group = "Gender",
+                                     warning = FALSE,
+                                     var.equal = TRUE)
+BF_The_Self_Position_ttest
+
+save_as_docx(nice_table(BF_The_Self_Position_ttest),
+             path = "Table_BF_The_Self_Position_t_test.docx")
+
+# INTERPRETATION:
+# The "Self" Position scores did not show a statistically significant difference between gender groups, t(237) = -1.96, p = 0.0504, d = -0.37. Although male participants (M = 3.57, SD = 0.93) had slightly higher scores than female participants (M = 3.09, SD = 1.29), this difference is at the borderline of statistical significance (p = 0.0504) and is generally not considered a meaningful difference. The effect size (Cohen’s d) is moderate, suggesting that the practical impact of the gender difference may be limited.
+
+```
